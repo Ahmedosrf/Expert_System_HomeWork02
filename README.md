@@ -1,37 +1,76 @@
-# Expert System HomeWork02
-designing a Conflict Resolution Mechanism for a Media Advisor Expert System. 
-## Suggested scenario
- - A media advisory system uses data from multiple sources to recommend news or editorial priorities, but conflicts arise when one rule considers Source X reliable based on history.
-## Proposed dispute resolution mechanism
-1. Methods used to resolve conflict
-* Dispute resolution methods prioritize rules based on priority, importance, and specificity, and prioritize rules based on recent information over general rules.
+# Media Advisor Expert System — Conflict Resolution
 
-2. Justifications for choosing the method
-* The method chosen is prioritized to prioritize important rules, ensuring the system is based on the latest information, and specialization allows the system to adapt to unique situations, enhancing its effectiveness.
-  
-### Describe the methods used to resolve the conflict and Include an explanation of why your chosen method is appropriate:
-#### 1. Priority
+[![Notebook](https://img.shields.io/badge/interface-Jupyter-F37626?logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![Topic](https://img.shields.io/badge/topic-expert%20systems-6E40C9)](#conflict-resolution-policy)
+[![Status](https://img.shields.io/badge/status-coursework-blue)](#limitations)
 
-   **Priority is crucial in addressing unethical content, as it ensures immediate action       and minimizes negative impacts. For instance, content containing hate speech should       be rejected, regardless of engagement or novelty rules, to maintain ethical standards.**
-   * Identifies rules or events of higher importance for faster or more important action.
-   * Prioritizes most important rule based on credibility, novelty, or ethics.
-   * Example: 'Content Rejection' rule prioritized over 'Interaction Review' or 'Controversial Content'.
+> A rule-based reasoning study that designs a transparent conflict-resolution policy for a media-advisor expert system.
 
-#### 2. Recency
+## Project Overview
 
-   **Recency is crucial as it reflects the most current information in the system, with recently updated content being the most important and should be published or addressed immediately, reflecting current events or fresh information.**
+A media-advisor system may receive several rules about the same item: one source may be historically reliable, another item may be more recent, and a safety or privacy rule may impose a hard constraint. This notebook models that situation and proposes an ordered policy for deciding which rule should win when recommendations conflict.
 
-   * Resolves conflicts related to recently updated content.
-   * Prioritizes most recent content in conflict.
-   * Example: Content updated in last few hours.
-   * Prioritizes refreshing content if other rule indicates old content.
+The goal is not to train a statistical model. It is to make rule priorities explicit, auditable, and easier to test.
 
-#### 3. Privacy
+## Conflict-Resolution Policy
 
-   **Privacy is optimal when multiple rules are in place, with some being more specific for more accurate decisions. Prioritizing controversial or unethical content is crucial as it can lead to significant harm if not addressed promptly**
+The proposed policy applies the following principles:
 
-   * Identifies the most specific and complex rule for conflict resolution.
-   * More specific rules yield more accurate decision-making.
-   * Example: Specifying content based on national type and addressing controversial content.
+| Priority | Principle | Purpose |
+|---:|---|---|
+| 1 | **Safety, ethics, and privacy** | Prevent harmful or disallowed recommendations from being promoted by engagement or recency. |
+| 2 | **Specificity** | Prefer a rule written for the exact context over a broad default rule. |
+| 3 | **Source reliability** | Prefer evidence from a source with stronger historical credibility. |
+| 4 | **Recency** | Prefer newer information when the competing rules are otherwise comparable. |
+| 5 | **General priority** | Use an explicit rule priority as the final deterministic tie-breaker. |
 
-**Therefore, these three methods are the most important because the system is used with software scenarios where rights and privileges are overlapped, and it is a smart way for the system to be able to create an independent application on different elements.**
+This ordering separates **hard constraints** from **ranking preferences**. For example, a privacy violation should not be overridden by a high-engagement or breaking-news rule.
+
+## Example Decision Flow
+
+```text
+Collect applicable rules
+        ↓
+Reject actions that violate safety, ethics, or privacy
+        ↓
+Prefer the most specific applicable rule
+        ↓
+Compare source reliability and evidence freshness
+        ↓
+Apply explicit priority and record an explanation
+        ↓
+Return recommendation + winning rule + rejected conflicts
+```
+
+## Example Conflict
+
+Suppose a story is highly engaging but contains an unverified private claim. A recency rule and an engagement rule may recommend immediate publication, while a privacy rule blocks publication. Under this policy, privacy wins because it is a hard constraint. The system should return both the decision and the explanation so a reviewer can audit the result.
+
+## Notebook
+
+The notebook `Expert_System_HomeWork02_.ipynb` contains the coursework analysis and proposed mechanism. Run it from top to bottom after installing Jupyter:
+
+```bash
+git clone https://github.com/Ahmedosrf/Expert_System_HomeWork02.git
+cd Expert_System_HomeWork02
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\\Scripts\\activate
+pip install jupyter
+jupyter notebook Expert_System_HomeWork02_.ipynb
+```
+
+## Design Principles
+
+- **Deterministic:** Equal inputs should produce the same decision.
+- **Explainable:** The system should expose the winning rule and the reason it defeated alternatives.
+- **Conservative:** Safety, ethics, and privacy constraints should be fail-safe.
+- **Extensible:** New rules should declare scope, priority, evidence requirements, and conflict behavior.
+- **Testable:** Each conflict scenario should have an expected winner and explanation.
+
+## Limitations and Next Steps
+
+This repository documents a policy and coursework scenario rather than a complete production inference engine. A stronger implementation would represent rules as structured objects, add a conflict graph, define tie-breaking formally, create unit tests for contradictory rules, and log provenance for every recommendation. Any real media workflow also requires editorial review and clear accountability.
+
+## Maintainer
+
+[Ahmed Osrof](https://github.com/Ahmedosrf)
